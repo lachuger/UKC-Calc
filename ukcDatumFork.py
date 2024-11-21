@@ -52,6 +52,9 @@ def fetch_station_id():
         
         station_info = response.json()
 
+        # Print the keys of the station_info for debugging
+        print(f"Station info keys: {station_info.keys()}")
+
         if 'stations' in station_info and len(station_info['stations']) > 0:
             station_name = station_info['stations'][0]['name']
             station_name_entry.config(state='normal')
@@ -69,7 +72,13 @@ def fetch_station_id():
                 return
             
             datums_info = datums_response.json()
-            available_datums = [datum['datum'] for datum in datums_info['datums']]
+
+            # Print the keys of the datums_info for debugging
+            print(f"Datums info keys: {datums_info.keys()}")
+            print(f"Datums content: {datums_info['datums']}")
+
+            # Use the correct key for datum names
+            available_datums = [datum['name'] for datum in datums_info['datums']]
             
             datum_combo['values'] = available_datums
             datum_combo.set(available_datums[0])
@@ -78,6 +87,8 @@ def fetch_station_id():
 
     except Exception as e:
         messagebox.showerror("Error", f"Failed to fetch station data: {e}")
+
+
 
 def fetch_tide_data():
     station_id = station_id_entry.get()
