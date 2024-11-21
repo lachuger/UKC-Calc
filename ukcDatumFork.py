@@ -32,29 +32,45 @@ def on_station_select(event):
         station_id_entry.delete(0, tk.END)
         station_id_entry.insert(0, station_id.strip(')'))
 
+def validate_datums(station_id, datums):
+    valid_datums = []
+    for datum in datums:
+        try:
+            # Check if tide data is available for the datum
+            response = requests.get(f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', params={
+                'product': 'predictions',
+                'application': 'DataFetch',
+                'begin_date': '20230101',
+                'end_date': '20230102',
+                'datum': datum['name'],
+                'station': station_id,
+                'time_zone': 'GMT',
+                'units': 'metric',
+                'interval': 'h',
+                'format': 'json'
+            })
+            
+            if response.status_code == 200 and 'predictions' in response.json():
+                valid_datums.append(datum['name'])
+        except Exception as e:
+            print(f"Error validating datum {datum['name']}: {e}")
+    
+    return valid_datums
+
 def fetch_station_id():
     station_id = station_id_entry.get()
     try:
         response = requests.get(f'https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations/{station_id}.json')
         
-        # Check if the response is valid
         if response.status_code != 200:
             messagebox.showerror("Error", f"Failed to fetch station data: {response.status_code}")
             return
 
-        # Print the response content for debugging
-        print(f"Response content: {response.content}")
-        
-        # Check if the response content is empty
         if not response.content:
             messagebox.showerror("Error", "Received empty response from the API.")
             return
         
         station_info = response.json()
-
-        # Print the keys of the station_info for debugging
-        print(f"Station info keys: {station_info.keys()}")
-
         if 'stations' in station_info and len(station_info['stations']) > 0:
             station_name = station_info['stations'][0]['name']
             station_name_entry.config(state='normal')
@@ -62,32 +78,26 @@ def fetch_station_id():
             station_name_entry.insert(0, station_name)
             station_name_entry.config(state='readonly')
             
-            # Use the 'self' URL for datums from the station information
             datums_url = station_info['stations'][0]['datums']['self']
             datums_response = requests.get(datums_url)
             
-            # Check if the datums response is valid
             if datums_response.status_code != 200:
                 messagebox.showerror("Error", f"Failed to fetch datums data: {datums_response.status_code}")
                 return
             
             datums_info = datums_response.json()
-
-            # Print the keys of the datums_info for debugging
-            print(f"Datums info keys: {datums_info.keys()}")
-            print(f"Datums content: {datums_info['datums']}")
-
-            # Use the correct key for datum names
-            available_datums = [datum['name'] for datum in datums_info['datums']]
+            available_datums = validate_datums(station_id, datums_info['datums'])
             
-            datum_combo['values'] = available_datums
-            datum_combo.set(available_datums[0])
+            if available_datums:
+                datum_combo['values'] = available_datums
+                datum_combo.set(available_datums[0])
+            else:
+                messagebox.showinfo("Info", "No valid datums found for tide data.")
         else:
             messagebox.showinfo("Info", "Station not found, please enter a valid ID.")
 
     except Exception as e:
         messagebox.showerror("Error", f"Failed to fetch station data: {e}")
-
 
 
 def fetch_tide_data():
