@@ -27,7 +27,7 @@ def fetch_tide_data():
     date = date_entry.get()
     try:
         data = requests.get(f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date={date}&range=24&station={station_id}&product=predictions&interval=hilo&datum=MLLW&time_zone=lst_ldt&units=english&application=DataAPI_Sample&format=json')
-        return data
+        display_data(data.json())
 
     except Exception as e:
         messagebox.showerror("Error," f"Failed to fetch data: {e}")
@@ -36,9 +36,10 @@ def display_data(data):
     result_text.delete(1.0, tk.END)
     result_text.insert(tk.END, f"{'Time':<15}{'Height (ft)':<15}{'Height (m)':<15}\n")
     result_text.insert(tk.END, "-"*45 + "\n")
-    for _, row in data.iterrows():
+    print(f"here {data}")
+    for row in data['predictions']:
         time = row['t']
-        height_ft = row['v'] * 3.28084
+        height_ft = float(row['v']) * 3.28084
         height_m = row['v']
         result_text.insert(tk.END, f"{time:<15}{height_ft:<15.2f}{height_m:<15.2f}\n")
 
