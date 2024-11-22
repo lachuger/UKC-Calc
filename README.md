@@ -13,3 +13,5 @@ ukcDatumFork.py is the current build in progress.
 -Currently in the process of debugging issue where stationID is being pulled but data isn't populating the "Datum" def correctly
 
 -(NEW)Added a validation step that doesn't seem to be working properly
+
+https://tidesandcurrents.noaa.gov/datum-updates/ntde/#:~:text=The%20National%20Tidal%20Datum%20Epoch,%2C%20mean%20lower%20low%20water)
