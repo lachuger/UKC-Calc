@@ -40,7 +40,7 @@ def display_data(data):
     for row in data['predictions']:
         time = row['t']
         height_ft = float(row['v']) * 3.28084
-        height_m = row['v']
+        height_m = float(row['v'])
         result_text.insert(tk.END, f"{time:<15}{height_ft:<15.2f}{height_m:<15.2f}\n")
 
 root = tk.Tk()
