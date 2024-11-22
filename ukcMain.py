@@ -25,9 +25,12 @@ def fetch_station_id():
 def fetch_tide_data():
     station_id = station_id_entry.get()
     date = date_entry.get()
-    
-    data = requests.get(f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date={date}&range=24&station={station_id}&product=predictions&interval=hilo&datum=MLLW&time_zone=lst_ldt&units=english&application=DataAPI_Sample&format=json')
+    try:
+        data = requests.get(f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date={date}&range=24&station={station_id}&product=predictions&interval=hilo&datum=MLLW&time_zone=lst_ldt&units=english&application=DataAPI_Sample&format=json')
+        return
 
+    except Exception as e:
+        messagebox.showerror("Error," f"Failed to fetch data: {e}")
 
 def display_data(data):
     result_text.delete(1.0, tk.END)
