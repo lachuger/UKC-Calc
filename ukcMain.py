@@ -43,8 +43,23 @@ def display_data(data):
         height_m = float(row['v'])
         result_text.insert(tk.END, f"{time:<15}{height_ft:<15.2f}{height_m:<15.2f}\n")
 
+def calculate_squat():
+    try:
+        block_coefficient = float(block_coefficient_entry.get())
+        speed_of_transit = float(speed_of_transit_entry.get())
+
+        squat = (block_coefficient * (speed_of_transit ** 2)) / 100
+
+        messagebox.showinfo("Squat Calculation", f"Estimated Squat: {squat:.2f} meters")
+        squat_entry.delete(0, tk.END)
+        squat_entry.insert(0, squat)
+
+    except ValueError:
+        messagebox.showerror("Error", "Please enter valid numeric values.")
+
+
 root = tk.Tk()
-root.title("Tide Data Fetcher")
+root.title("UKC Calculator")
 
 tk.Label(root, text="Tide Station Name:").grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
 station_name_entry = ttk.Entry(root)
@@ -66,5 +81,21 @@ fetch_button.grid(row=3, column=0, columnspan=2, pady=10)
 
 result_text = tk.Text(root, width=50, height=15)
 result_text.grid(row=4, column=0, columnspan=3, padx=10, pady=10)
+
+#Squat Calculator
+tk.Label(root, text="Block Coefficient:").grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
+block_coefficient_entry = ttk.Entry(root)
+block_coefficient_entry.grid(row=5, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Speed of Transit (knots):").grid(row=6, column=0, padx=10, pady=5, sticky=tk.W)
+speed_of_transit_entry = ttk.Entry(root)
+speed_of_transit_entry.grid(row=6, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Squat (meters):").grid(row=7, column=0, padx=10, pady=5, sticky=tk.W)
+squat_entry = ttk.Entry(root)
+squat_entry.grid(row=7, column=1, padx=10, pady=5)
+
+calculate_button = ttk.Button(root, text="Calculate Squat", command=calculate_squat)
+calculate_button.grid(row=8, column=0, columnspan=2, pady=10)
 
 root.mainloop()
