@@ -57,6 +57,22 @@ def calculate_squat():
     except ValueError:
         messagebox.showerror("Error", "Please enter valid numeric values.")
 
+def calculate_under_keel_clearance():
+    try:
+        shallowest_depth =  float(shallowest_depth_entry.get())
+        deep_draft = float(deep_draft_entry.get())
+        lowest_tide = float(lowest_tide_entry.get())
+        squat = float(squat_entry.get())
+
+        if squat is None or lowest_tide is None:
+            raise ValueError("Error in fetching squat or tide data.")
+        
+        under_keel_clearance = shallowest_depth + lowest_tide - (deep_draft + squat)
+        messagebox.showinfo("Under Keel Clearance", f"Estimated Under Keel Clearance: {under_keel_clearance:.2f} meters")
+
+    except ValueError:
+        messagebox.showerror("Error", "Please enter valid numeric values for all inputs.")
+
 
 root = tk.Tk()
 root.title("UKC Calculator")
@@ -97,5 +113,21 @@ squat_entry.grid(row=7, column=1, padx=10, pady=5)
 
 calculate_button = ttk.Button(root, text="Calculate Squat", command=calculate_squat)
 calculate_button.grid(row=8, column=0, columnspan=2, pady=10)
+
+#UKC Calculator
+tk.Label(root, text="Lowest Tide (meters):").grid(row=9, column=0, padx=10, pady=5, sticky=tk.W)
+lowest_tide_entry = ttk.Entry(root)
+lowest_tide_entry.grid(row=9, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Shallowest Depth on Route (meters):").grid(row=10, column=0, padx=10, pady=5, sticky=tk.W)
+shallowest_depth_entry = ttk.Entry(root)
+shallowest_depth_entry.grid(row=10, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Vessel Deep Draft (meters):").grid(row=11, column=0, padx=10, pady=5, sticky=tk.W)
+deep_draft_entry = ttk.Entry(root)
+deep_draft_entry.grid(row=11, column=1, padx=10, pady=5)
+
+calculateUKC_button = ttk.Button(root, text="Calculate Under Keel Clearance", command=calculate_under_keel_clearance)
+calculateUKC_button.grid(row=12, column=0, columnspan=2, pady=10)
 
 root.mainloop()
