@@ -77,6 +77,11 @@ def calculate_under_keel_clearance():
         messagebox.showerror("Error", "Please enter valid numeric values for all inputs.")
 
 def height_of_tide():
+    
+    hour_of_passage = hour_of_passage_entry.get()
+    minute_of_passage = minute_of_passage_entry.get()
+    time_of_passage_delta = timedelta(hours=hour_of_passage, minutes=minute_of_passage)
+
     #Mid-Time Calculation
     time_high = timedelta(hours=, minutes=)
     time_low = timedelta(hours=, minutes=)
@@ -91,7 +96,7 @@ def height_of_tide():
     tidal_range = height_high - height_low
 
     global tidal_prediction
-    tidal_prediction = (tidal_median + tidal_range) * ((math.pi * (time_of_passage - time_mid)) / (time_high - time_low))
+    tidal_prediction = (tidal_median + tidal_range) * ((math.pi * (time_of_passage_delta - time_mid)) / (time_high - time_low))
 
 
 root = tk.Tk()
@@ -149,5 +154,13 @@ deep_draft_entry.grid(row=11, column=1, padx=10, pady=5)
 
 calculateUKC_button = ttk.Button(root, text="Calculate Under Keel Clearance", command=calculate_under_keel_clearance)
 calculateUKC_button.grid(row=12, column=0, columnspan=2, pady=10)
+
+tk.Label(root, text="Hour of Passage:").grid(row=13, column=0, padx=10, pady=5, sticky=tk.W)
+hour_of_passage_entry = ttk.Entry(root)
+hour_of_passage_entry.grid(row=13, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Minute of Passage:").grid(row=14, column=0, padx=10, pady=5, sticky=tk.W)
+minute_of_passage_entry = ttk.Entry(root)
+minute_of_passage_entry.grid(row=14, column=1, padx=10, pady=5)
 
 root.mainloop()
