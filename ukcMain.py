@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import requests
 from noaa_coops import Station
+import datetime
+from datetime import timedelta
+import math
 
 def fetch_station_id():
     station_name = station_name_entry.get()
@@ -72,6 +75,23 @@ def calculate_under_keel_clearance():
 
     except ValueError:
         messagebox.showerror("Error", "Please enter valid numeric values for all inputs.")
+
+def height_of_tide():
+    #Mid-Time Calculation
+    time_high = timedelta(hours=, minutes=)
+    time_low = timedelta(hours=, minutes=)
+
+    if time_high > time_low
+        time_mid = (time_high - time_low) / 2
+    else
+        time_mid = (time_low - time_high) / 2
+
+    #Tidal Range Calculation
+    tidal_median = (height_high - height_low) / 2
+    tidal_range = height_high - height_low
+
+    global tidal_prediction
+    tidal_prediction = (tidal_median + tidal_range) * ((math.pi * (time_of_passage - time_mid)) / (time_high - time_low))
 
 
 root = tk.Tk()
