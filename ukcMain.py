@@ -81,9 +81,9 @@ def height_of_tide():
     time_high = timedelta(hours=, minutes=)
     time_low = timedelta(hours=, minutes=)
 
-    if time_high > time_low
+    if time_high > time_low:
         time_mid = (time_high - time_low) / 2
-    else
+    else:
         time_mid = (time_low - time_high) / 2
 
     #Tidal Range Calculation
