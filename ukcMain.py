@@ -28,6 +28,9 @@ def fetch_station_id():
 def fetch_tide_data():
     station_id = station_id_entry.get()
     date = date_entry.get()
+    date_obj = datetime.strptime(date, "%Y%m%d")
+    day_before = date_obj() - timedelta(days=1)
+
     try:
         data = requests.get(f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date={date}&range=24&station={station_id}&product=predictions&interval=hilo&datum=MLLW&time_zone=lst_ldt&units=english&application=DataAPI_Sample&format=json')
         display_data(data.json())
@@ -83,8 +86,8 @@ def height_of_tide():
     time_of_passage_delta = timedelta(hours=hour_of_passage, minutes=minute_of_passage)
 
     #Mid-Time Calculation
-    time_high = timedelta(hours=, minutes=)
-    time_low = timedelta(hours=, minutes=)
+    time_high = timedelta(hours=9999, minutes=9999)
+    time_low = timedelta(hours=9999, minutes=9999)
 
     if time_high > time_low:
         time_mid = (time_high - time_low) / 2
