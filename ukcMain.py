@@ -1,5 +1,8 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+import ttkbootstrap as tb
+
+from tkcalendar import Calendar
+
 import requests
 from noaa_coops import Station
 import datetime
@@ -21,19 +24,18 @@ def fetch_station_id():
                 return
         
         # If station not found, notify the user
-        messagebox.showinfo("Info", "Station not found, please enter the ID manually.")
+        tb.messagebox.showinfo("Info", "Station not found, please enter the ID manually.")
 
     except Exception as e:
-        messagebox.showerror("Error", f"Failed to fetch station data: {e}")
+        tb.messagebox.showerror("Error", f"Failed to fetch station data: {e}")
 
 def fetch_tide_data():
     station_id = station_id_entry.get()
-    date = date_entry.get()
+    date_str = date_entry.entry.get()
     global date_obj
-    date_obj = datetime.strptime(date, "%Y%m%d")
+    date_obj = datetime.strptime(date_str, "%m/%d/%Y")
     day_before = date_obj - timedelta(days=1)
     date_output = day_before.strftime("%Y%m%d")
-    print(date_output)
 
     try:
         data = requests.get(f'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date={date_output}&range=72&station={station_id}&product=predictions&interval=hilo&datum=MLLW&time_zone=lst_ldt&units=english&application=DataAPI_Sample&format=json')
@@ -41,7 +43,7 @@ def fetch_tide_data():
         height_of_tide(data.json())
 
     except Exception as e:
-        messagebox.showerror("Error," f"Failed to fetch data: {e}")
+        tb.messagebox.showerror("Error," f"Failed to fetch data: {e}")
 
 def display_data(data):
     result_text.delete(1.0, tk.END)
@@ -61,12 +63,12 @@ def calculate_squat():
 
         squat = (block_coefficient * (speed_of_transit ** 2)) / 100
 
-        messagebox.showinfo("Squat Calculation", f"Estimated Squat: {squat:.2f} meters")
+        tb.messagebox.showinfo("Squat Calculation", f"Estimated Squat: {squat:.2f} meters")
         squat_entry.delete(0, tk.END)
         squat_entry.insert(0, squat)
 
     except ValueError:
-        messagebox.showerror("Error", "Please enter valid numeric values.")
+        tb.messagebox.showerror("Error", "Please enter valid numeric values.")
 
 def calculate_under_keel_clearance():
     try:
@@ -79,10 +81,10 @@ def calculate_under_keel_clearance():
             raise ValueError("Error in fetching squat or tide data.")
         
         under_keel_clearance = shallowest_depth + lowest_tide - (deep_draft + squat)
-        messagebox.showinfo("Under Keel Clearance", f"Estimated Under Keel Clearance: {under_keel_clearance:.2f} meters")
+        tb.messagebox.showinfo("Under Keel Clearance", f"Estimated Under Keel Clearance: {under_keel_clearance:.2f} meters")
 
     except ValueError:
-        messagebox.showerror("Error", "Please enter valid numeric values for all inputs.")
+        tb.messagebox.showerror("Error", "Please enter valid numeric values for all inputs.")
 
 def height_of_tide(data): #take in the output JSON from NOA
     
@@ -102,11 +104,19 @@ def height_of_tide(data): #take in the output JSON from NOA
        # height_ft = float(row['v']) * 3.28084
        # height_m = float(row['v'])
        # result_text.insert(tk.END, f"{time:<15}{height_ft:<15.2f}{height_m:<15.2f}\n")
-       tide_time = datetime.strptime('2024-12-11 01:38',"%Y-%m-%d %H:%M")
-
+       tide_time = datetime.strptime(row['t'],"%Y-%m-%d %H:%M")
        if tide_time > time_of_passage:
-           print(float(row['v']))
+           tide_after = float(row['v'])
+           time_after = tide_time
            break
+       tide_before = float(row['v'])
+       time_before = tide_time
+
+    print (f"tide_before: {tide_before}")
+    print (f"time_before: {time_before}")
+
+    print (f"tide_after: {tide_after}")
+    print (f"time_after: {time_after}")
 
     #Mid-Time Calculation
     time_high = timedelta(hours=9999, minutes=9999)
@@ -125,71 +135,70 @@ def height_of_tide(data): #take in the output JSON from NOA
     tidal_prediction = (tidal_median + tidal_range) * ((math.pi * (time_of_passage_delta - time_mid)) / (time_high - time_low))
 
 
-root = tk.Tk()
+root = tb.Window(themename="yeti")
 root.title("UKC Calculator")
 
-tk.Label(root, text="Tide Station Name:").grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
-station_name_entry = ttk.Entry(root)
+tb.Label(root, text="Tide Station Name:").grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
+station_name_entry = tb.Entry(root)
 station_name_entry.insert(0,"Seattle")
 station_name_entry.grid(row=0, column=1, padx=10, pady=5)
 
-search_button = ttk.Button(root, text="Search Station ID", command=fetch_station_id)
+search_button = tb.Button(root, text="Search Station ID", command=fetch_station_id)
 search_button.grid(row=0, column=2, padx=10, pady=5)
 
-tk.Label(root, text="Tide Station ID:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.W)
-station_id_entry = ttk.Entry(root)
+tb.Label(root, text="Tide Station ID:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.W)
+station_id_entry = tb.Entry(root)
 station_id_entry.grid(row=1, column=1, padx=10, pady=5)
 
-tk.Label(root, text="Date (YYYYMMDD):").grid(row=2, column=0, padx=10, pady=5, sticky=tk.W)
-date_entry = ttk.Entry(root)
-date_entry.insert(0,"20241212")
+tb.Label(root, text="Date (MM/DD/YYYY):").grid(row=2, column=0, padx=10, pady=5, sticky=tk.W)
+date_entry = tb.DateEntry(root)
 date_entry.grid(row=2, column=1, padx=10, pady=5)
 
-fetch_button = ttk.Button(root, text="Fetch Tide Data", command=fetch_tide_data)
+fetch_button = tb.Button(root, text="Fetch Tide Data", command=fetch_tide_data)
 fetch_button.grid(row=3, column=0, columnspan=2, pady=10)
 
-result_text = tk.Text(root, width=50, height=15)
+result_text = tb.Text(root, width=50, height=15)
 result_text.grid(row=4, column=0, columnspan=3, padx=10, pady=10)
 
 #Squat Calculator
-tk.Label(root, text="Block Coefficient:").grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
-block_coefficient_entry = ttk.Entry(root)
+tb.Label(root, text="Block Coefficient:").grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
+block_coefficient_entry = tb.Entry(root)
 block_coefficient_entry.grid(row=5, column=1, padx=10, pady=5)
 
-tk.Label(root, text="Speed of Transit (knots):").grid(row=6, column=0, padx=10, pady=5, sticky=tk.W)
-speed_of_transit_entry = ttk.Entry(root)
+tb.Label(root, text="Speed of Transit (knots):").grid(row=6, column=0, padx=10, pady=5, sticky=tk.W)
+speed_of_transit_entry = tb.Entry(root)
 speed_of_transit_entry.grid(row=6, column=1, padx=10, pady=5)
 
-tk.Label(root, text="Squat (meters):").grid(row=7, column=0, padx=10, pady=5, sticky=tk.W)
-squat_entry = ttk.Entry(root)
+tb.Label(root, text="Squat (meters):").grid(row=7, column=0, padx=10, pady=5, sticky=tk.W)
+squat_entry = tb.Entry(root)
 squat_entry.grid(row=7, column=1, padx=10, pady=5)
 
-calculate_button = ttk.Button(root, text="Calculate Squat", command=calculate_squat)
+calculate_button = tb.Button(root, text="Calculate Squat", command=calculate_squat)
 calculate_button.grid(row=8, column=0, columnspan=2, pady=10)
 
 #UKC Calculator
-tk.Label(root, text="Lowest Tide (meters):").grid(row=9, column=0, padx=10, pady=5, sticky=tk.W)
-lowest_tide_entry = ttk.Entry(root)
+tb.Label(root, text="Lowest Tide (meters):").grid(row=9, column=0, padx=10, pady=5, sticky=tk.W)
+lowest_tide_entry = tb.Entry(root)
 lowest_tide_entry.grid(row=9, column=1, padx=10, pady=5)
 
-tk.Label(root, text="Shallowest Depth on Route (meters):").grid(row=10, column=0, padx=10, pady=5, sticky=tk.W)
-shallowest_depth_entry = ttk.Entry(root)
+tb.Label(root, text="Shallowest Depth on Route (meters):").grid(row=10, column=0, padx=10, pady=5, sticky=tk.W)
+shallowest_depth_entry = tb.Entry(root)
 shallowest_depth_entry.grid(row=10, column=1, padx=10, pady=5)
 
-tk.Label(root, text="Vessel Deep Draft (meters):").grid(row=11, column=0, padx=10, pady=5, sticky=tk.W)
-deep_draft_entry = ttk.Entry(root)
+tb.Label(root, text="Vessel Deep Draft (meters):").grid(row=11, column=0, padx=10, pady=5, sticky=tk.W)
+deep_draft_entry = tb.Entry(root)
 deep_draft_entry.grid(row=11, column=1, padx=10, pady=5)
 
-calculateUKC_button = ttk.Button(root, text="Calculate Under Keel Clearance", command=calculate_under_keel_clearance)
+calculateUKC_button = tb.Button(root, text="Calculate Under Keel Clearance", command=calculate_under_keel_clearance)
 calculateUKC_button.grid(row=12, column=0, columnspan=2, pady=10)
 
-tk.Label(root, text="Hour of Passage:").grid(row=13, column=0, padx=10, pady=5, sticky=tk.W)
-hour_of_passage_entry = ttk.Entry(root)
+tb.Label(root, text="Hour of Passage:").grid(row=13, column=0, padx=10, pady=5, sticky=tk.W)
+hour_of_passage_entry = tb.Entry(root)
 hour_of_passage_entry.insert(0,"13")
 hour_of_passage_entry.grid(row=13, column=1, padx=10, pady=5)
 
-tk.Label(root, text="Minute of Passage:").grid(row=14, column=0, padx=10, pady=5, sticky=tk.W)
-minute_of_passage_entry = ttk.Entry(root)
+tb.Label(root, text="Minute of Passage:").grid(row=14, column=0, padx=10, pady=5, sticky=tk.W)
+minute_of_passage_entry = tb.Entry(root)
 minute_of_passage_entry.insert(0,"47")
 minute_of_passage_entry.grid(row=14, column=1, padx=10, pady=5)
 
